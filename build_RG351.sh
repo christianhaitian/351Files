@@ -60,7 +60,7 @@ rm -rf build
 # Build for CHI, ArkOS
 #build351Files CHI ArkOS /roms ./res
 
-if [[ "${1}" == "RGB20PRO" ]] || [[ "${1}" == "RGB30" ]] || [[ "${1}" == "RG351V" ]] || [[ "${1}" == "RG351MP" ]] || [[ "${1}" == "RG353V" ]] || [[ "${1}" == "RG503" ]]; then
+if [[ "${1}" == "MINILOONG" ]] || [[ "${1}" == "RGB20PRO" ]] || [[ "${1}" == "RGB30" ]] || [[ "${1}" == "RG351V" ]] || [[ "${1}" == "RG351MP" ]] || [[ "${1}" == "RG353V" ]] || [[ "${1}" == "RG503" ]]; then
   build351Files "$1" "$2" "/roms2" "$4"
   mv -f 351Files 351Files-sd2.tmp
   build351Files "$1" "$2" "/roms" "$4"

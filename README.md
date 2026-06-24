@@ -129,6 +129,9 @@ cd 351Files
 ## For CHI and ArkOS
 ./build_RG351.sh CHI ArkOS /roms ./res
 
+## For MiniLoong and ArkOS
+./build_RG351.sh MINILOONG ArkOS /roms ./res
+
 ## For RGB10Max and ArkOS/RetroOZ/TheRA
 ./build_RG351.sh OGS ArkOS /roms ./res
 

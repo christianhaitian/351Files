@@ -63,7 +63,7 @@ TextViewer::TextViewer(const std::string &p_title):
    // Init scrollbar
    adjustScrollbar();
    // Number of visible chars
-   m_nbVisibleChars = round(static_cast<double>(SCREEN_WIDTH - 2*MARGIN_X - m_scrollbar.w) / g_charW);
+   m_nbVisibleChars = round(static_cast<double>(g_screenWidth - 2*g_marginX - m_scrollbar.w) / g_charW);
 }
 
 //------------------------------------------------------------------------------
@@ -84,13 +84,13 @@ void TextViewer::render(const bool p_focus)
 
    // Render title background
    SDL_SetRenderDrawColor(g_renderer, COLOR_TITLE_BG, 255);
-   SDL_Rect rect { 0, 0, SCREEN_WIDTH, LINE_HEIGHT };
+   SDL_Rect rect { 0, 0, g_screenWidth, g_lineHeight };
    SDL_RenderFillRect(g_renderer, &rect);
 
    // Render title
-   int l_y = LINE_HEIGHT / 2;
-   SDLUtils::renderTexture(g_iconFileText, MARGIN_X, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
-   SDLUtils::renderText(m_title, g_font, MARGIN_X + ICON_SIZE + MARGIN_X, l_y, {COLOR_TEXT_NORMAL}, {COLOR_TITLE_BG}, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+   int l_y = g_lineHeight / 2;
+   SDLUtils::renderTexture(g_iconFileText, g_marginX, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+   SDLUtils::renderText(m_title, g_font, g_marginX + g_iconSize + g_marginX, l_y, {COLOR_TEXT_NORMAL}, {COLOR_TITLE_BG}, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
 
    // Render scrollbar
    if (p_focus)
@@ -101,12 +101,12 @@ void TextViewer::render(const bool p_focus)
       SDL_RenderFillRect(g_renderer, &m_scrollbar);
 
    // Render lines
-   l_y += LINE_HEIGHT;
+   l_y += g_lineHeight;
    SDL_Color l_fgColor = {COLOR_TEXT_NORMAL};
    SDL_Color l_bgColor = {COLOR_BODY_BG};
-   for (int l_i = m_camera.y; l_i < m_camera.y + m_nbVisibleLines && l_i < m_nbItems; ++l_i, l_y += LINE_HEIGHT)
+   for (int l_i = m_camera.y; l_i < m_camera.y + m_nbVisibleLines && l_i < m_nbItems; ++l_i, l_y += g_lineHeight)
       if (m_camera.x < static_cast<int>(m_lines[l_i].size()))
-         SDLUtils::renderText(m_lines[l_i].substr(m_camera.x, m_nbVisibleChars), g_fontMono, MARGIN_X, l_y, l_fgColor, l_bgColor, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+         SDLUtils::renderText(m_lines[l_i].substr(m_camera.x, m_nbVisibleChars), g_fontMono, g_marginX, l_y, l_fgColor, l_bgColor, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
 }
 
 //------------------------------------------------------------------------------

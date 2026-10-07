@@ -37,7 +37,7 @@ TextEditor::TextEditor(const std::string &p_title):
    // Init scrollbar
    adjustScrollbar();
    // Number of visible chars
-   m_nbVisibleChars = round(static_cast<double>(SCREEN_WIDTH - 2*MARGIN_X - m_scrollbar.w) / g_charW);
+   m_nbVisibleChars = round(static_cast<double>(g_screenWidth - 2*g_marginX - m_scrollbar.w) / g_charW);
 }
 
 //------------------------------------------------------------------------------
@@ -58,13 +58,13 @@ void TextEditor::render(const bool p_focus)
 
    // Render title background
    SDL_SetRenderDrawColor(g_renderer, COLOR_TITLE_BG, 255);
-   SDL_Rect rect { 0, 0, SCREEN_WIDTH, LINE_HEIGHT };
+   SDL_Rect rect { 0, 0, g_screenWidth, g_lineHeight };
    SDL_RenderFillRect(g_renderer, &rect);
 
    // Render title
-   int l_y = LINE_HEIGHT / 2;
-   SDLUtils::renderTexture(g_iconEdit, MARGIN_X, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
-   SDLUtils::renderText(m_title, g_font, MARGIN_X + ICON_SIZE + MARGIN_X, l_y, {COLOR_TEXT_NORMAL}, {COLOR_TITLE_BG}, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+   int l_y = g_lineHeight / 2;
+   SDLUtils::renderTexture(g_iconEdit, g_marginX, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+   SDLUtils::renderText(m_title, g_font, g_marginX + g_iconSize + g_marginX, l_y, {COLOR_TEXT_NORMAL}, {COLOR_TITLE_BG}, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
 
    // Render scrollbar
    if (p_focus)
@@ -75,13 +75,13 @@ void TextEditor::render(const bool p_focus)
       SDL_RenderFillRect(g_renderer, &m_scrollbar);
 
    // Render lines
-   l_y += LINE_HEIGHT;
+   l_y += g_lineHeight;
    SDL_Color l_fgColor = {COLOR_TEXT_NORMAL};
    SDL_Color l_bgColor = {COLOR_BODY_BG};
    SDL_Color l_bgColorSelect = {COLOR_CURSOR_FOCUS};
    std::string subLine = "";
    int nbCharPart1 = 0, nbCharPart2 = 0, nbCharPart3 = 0;
-   for (int l_i = m_camera.y; l_i < m_camera.y + m_nbVisibleLines && l_i < m_nbItems; ++l_i, l_y += LINE_HEIGHT)
+   for (int l_i = m_camera.y; l_i < m_camera.y + m_nbVisibleLines && l_i < m_nbItems; ++l_i, l_y += g_lineHeight)
    {
       // Case : nothing visible on this line
       if (m_camera.x >= static_cast<int>(m_lines[l_i].size()))
@@ -89,7 +89,7 @@ void TextEditor::render(const bool p_focus)
       // Case: no text selection
       if (m_textSelectionStart.y == -1 || m_textSelectionEnd.y == -1)
       {
-         SDLUtils::renderText(m_lines[l_i].substr(m_camera.x, m_nbVisibleChars), g_fontMono, MARGIN_X, l_y, l_fgColor, l_bgColor, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+         SDLUtils::renderText(m_lines[l_i].substr(m_camera.x, m_nbVisibleChars), g_fontMono, g_marginX, l_y, l_fgColor, l_bgColor, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
          continue;
       }
       // Case: text selection
@@ -101,19 +101,19 @@ void TextEditor::render(const bool p_focus)
       nbCharPart3 = subLine.size() - nbCharPart1 - nbCharPart2;
       // Render line in 3 parts : unselected / selected / unselected
       if (nbCharPart1 > 0)
-         SDLUtils::renderText(subLine.substr(0, nbCharPart1), g_fontMono, MARGIN_X, l_y, l_fgColor, l_bgColor, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+         SDLUtils::renderText(subLine.substr(0, nbCharPart1), g_fontMono, g_marginX, l_y, l_fgColor, l_bgColor, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
       if (nbCharPart2 > 0 && ! subLine.substr(nbCharPart1, nbCharPart2).empty())
-         SDLUtils::renderText(subLine.substr(nbCharPart1, nbCharPart2), g_fontMono, MARGIN_X + nbCharPart1 * g_charW, l_y, l_fgColor, l_bgColorSelect, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+         SDLUtils::renderText(subLine.substr(nbCharPart1, nbCharPart2), g_fontMono, g_marginX + nbCharPart1 * g_charW, l_y, l_fgColor, l_bgColorSelect, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
       if (nbCharPart3 > 0 && ! subLine.substr(nbCharPart1 + nbCharPart2, nbCharPart3).empty())
-         SDLUtils::renderText(subLine.substr(nbCharPart1 + nbCharPart2, nbCharPart3), g_fontMono, MARGIN_X + (nbCharPart1 + nbCharPart2) * g_charW, l_y, l_fgColor, l_bgColor, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+         SDLUtils::renderText(subLine.substr(nbCharPart1 + nbCharPart2, nbCharPart3), g_fontMono, g_marginX + (nbCharPart1 + nbCharPart2) * g_charW, l_y, l_fgColor, l_bgColor, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
    }
 
    // Render cursor
    SDL_SetRenderDrawColor(g_renderer, COLOR_TEXT_NORMAL, 255);
    rect.w = 1;
-   rect.h = LINE_HEIGHT - 4;
-   rect.x = MARGIN_X + (m_inputTextCursor.x - m_camera.x) * g_charW;
-   rect.y = LINE_HEIGHT + 2 +(m_inputTextCursor.y - m_camera.y) * LINE_HEIGHT;
+   rect.h = g_lineHeight - 4;
+   rect.x = g_marginX + (m_inputTextCursor.x - m_camera.x) * g_charW;
+   rect.y = g_lineHeight + 2 +(m_inputTextCursor.y - m_camera.y) * g_lineHeight;
    SDL_RenderFillRect(g_renderer, &rect);
 }
 
@@ -128,7 +128,7 @@ void TextEditor::keyPressed(const SDL_Event &event)
       // Reset timer
       resetTimer();
       // If the keyboard hides the cursor, move the camera to make it visible
-      if ((m_inputTextCursor.y - m_camera.y + 2) * LINE_HEIGHT > SCREEN_HEIGHT - Keyboard::getKeyboardH())
+      if ((m_inputTextCursor.y - m_camera.y + 2) * g_lineHeight > g_screenHeight - Keyboard::getKeyboardH())
       {
          m_camera.y = m_inputTextCursor.y - 2;
          adjustScrollbarPosition();
@@ -311,8 +311,8 @@ void TextEditor::adjustCamera(void)
       m_camera.y = m_inputTextCursor.y - m_nbVisibleLines + 1;
 
    // Adjust camera X
-   if (MARGIN_X + (m_inputTextCursor.x - m_camera.x) * g_charW > SCREEN_WIDTH - m_scrollbar.w - MARGIN_X)
-      m_camera.x = m_inputTextCursor.x - ((SCREEN_WIDTH - m_scrollbar.w - 2*MARGIN_X) / g_charW);
+   if (g_marginX + (m_inputTextCursor.x - m_camera.x) * g_charW > g_screenWidth - m_scrollbar.w - g_marginX)
+      m_camera.x = m_inputTextCursor.x - ((g_screenWidth - m_scrollbar.w - 2*g_marginX) / g_charW);
    else if ((m_inputTextCursor.x - m_camera.x) * g_charW < 0)
       m_camera.x = m_inputTextCursor.x;
 }

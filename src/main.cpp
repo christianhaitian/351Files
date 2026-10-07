@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <fstream>
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include "def.h"
@@ -13,11 +14,24 @@
 SDL_Window* g_window = NULL;
 SDL_Renderer* g_renderer = NULL;
 SDL_Joystick* g_joystick = NULL;
+int g_screenWidth = 0;
+int g_screenHeight = 0;
+int g_fontSize = 0;
+int g_lineHeight = 0;
+int g_iconSize = 0;
+int g_marginX = 0;
+int g_keyboardMargin = 0;
+int g_keyboardKeySpacing = 0;
+int g_keyboardSymbolSize = 0;
 TTF_Font *g_font = NULL;
 TTF_Font *g_fontMono = NULL;
 int g_charW = 0;
 std::vector<IWindow *> g_windows;
 bool IWindow::g_hasChanged = true;
+int g_btnOk = 1;
+int g_btnBack = 0;
+int g_btnSelect = 2;
+int g_btnMenu = 3;
 
 // Textures for icons
 SDL_Texture *g_iconFile = NULL;
@@ -41,9 +55,35 @@ SDL_Texture *g_iconPlus = NULL;
 
 //------------------------------------------------------------------------------
 
+void loadKeymap()
+{
+   std::ifstream file("351Files.cfg");
+   if (! file.is_open())
+      return;
+
+   std::string line;
+   while (std::getline(file, line))
+   {
+      size_t eq = line.find('=');
+      if (eq == std::string::npos)
+         continue;
+
+      std::string key = line.substr(0, eq);
+      int value = atoi(line.substr(eq + 1).c_str());
+
+      if (key == "OK")          g_btnOk = value;
+      else if (key == "BACK")   g_btnBack = value;
+      else if (key == "SELECT") g_btnSelect = value;
+      else if (key == "MENU")   g_btnMenu = value;
+   }
+}
+
+//------------------------------------------------------------------------------
+
 int main(int argc, char* args[])
 {
    // Init SDL
+   loadKeymap();
    if (! SDLUtils::init())
    {
       SDLUtils::close();
@@ -52,7 +92,7 @@ int main(int argc, char* args[])
 
    // Load icon textures
    std::ostringstream oss;
-   oss << '/' << ICON_SIZE;
+   oss << '/' << g_iconSize;
    g_iconFile =      SDLUtils::loadTexture(std::string(RES_PATH) + oss.str() + "/file.png");
    g_iconDir =       SDLUtils::loadTexture(std::string(RES_PATH) + oss.str() + "/folder.png");
    g_iconUp =        SDLUtils::loadTexture(std::string(RES_PATH) + oss.str() + "/up.png");
@@ -73,8 +113,8 @@ int main(int argc, char* args[])
    g_iconPlus =      SDLUtils::loadTexture(std::string(RES_PATH) + oss.str() + "/plus.png");
 
    // Load fonts
-   g_font = SDLUtils::loadFont(std::string(RES_PATH) + "/" + FONT_NAME, FONT_SIZE);
-   g_fontMono = SDLUtils::loadFont(std::string(RES_PATH) + "/" + FONT_NAME_MONO, FONT_SIZE);
+   g_font = SDLUtils::loadFont(std::string(RES_PATH) + "/" + FONT_NAME, g_fontSize);
+   g_fontMono = SDLUtils::loadFont(std::string(RES_PATH) + "/" + FONT_NAME_MONO, g_fontSize);
    if (g_font == NULL || g_fontMono == NULL)
    {
       SDLUtils::close();

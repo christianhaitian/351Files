@@ -32,10 +32,10 @@ IWindow::IWindow(const bool p_fullscreen, const std::string &p_title) :
    // Init scrollbar
    m_scrollbar.w = 0;
    m_scrollbar.h = 0;
-   m_scrollbar.x = SCREEN_WIDTH - MARGIN_X;
-   m_scrollbar.y = LINE_HEIGHT;
+   m_scrollbar.x = g_screenWidth - g_marginX;
+   m_scrollbar.y = g_lineHeight;
    // Init m_nbVisibleLines
-   m_nbVisibleLines = (SCREEN_HEIGHT - LINE_HEIGHT) / LINE_HEIGHT;
+   m_nbVisibleLines = (g_screenHeight - g_lineHeight) / g_lineHeight;
    // Add window to the list
    g_windows.push_back(this);
    g_hasChanged = true;
@@ -213,7 +213,7 @@ void IWindow::renderAll(void)
 void IWindow::renderPresent(void)
 {
    SDL_RenderPresent(g_renderer);
-   #ifndef DEVICE_PC
+   #if !defined(DEVICE_PC) && !defined(DEVICE_RG351MP)
    SDL_RenderPresent(g_renderer);
    SDL_RenderPresent(g_renderer);
    #endif
@@ -324,10 +324,10 @@ void IWindow::adjustScrollbar(void)
       return;
    }
    // Scrollbar size
-   m_scrollbar.w = MARGIN_X;
-   m_scrollbar.h = round((double)(SCREEN_HEIGHT - LINE_HEIGHT) / (m_nbItems - m_nbVisibleLines + 1));
-   if (m_scrollbar.h < LINE_HEIGHT / 2)
-      m_scrollbar.h = LINE_HEIGHT / 2;
+   m_scrollbar.w = g_marginX;
+   m_scrollbar.h = round((double)(g_screenHeight - g_lineHeight) / (m_nbItems - m_nbVisibleLines + 1));
+   if (m_scrollbar.h < g_lineHeight / 2)
+      m_scrollbar.h = g_lineHeight / 2;
    // Scrollbar position
    adjustScrollbarPosition();
 }
@@ -343,9 +343,9 @@ void IWindow::adjustScrollbarPosition(void)
    // Case: last item visible => scrollbar at bottom
    if (m_camera.y >= m_nbItems - m_nbVisibleLines)
    {
-      m_scrollbar.y = SCREEN_HEIGHT - m_scrollbar.h;
+      m_scrollbar.y = g_screenHeight - m_scrollbar.h;
       return;
    }
    // General case
-   m_scrollbar.y = LINE_HEIGHT + round(((double)(SCREEN_HEIGHT - LINE_HEIGHT - m_scrollbar.h) / (m_nbItems - m_nbVisibleLines)) * m_camera.y);
+   m_scrollbar.y = g_lineHeight + round(((double)(g_screenHeight - g_lineHeight - m_scrollbar.h) / (m_nbItems - m_nbVisibleLines)) * m_camera.y);
 }

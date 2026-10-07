@@ -13,17 +13,17 @@ TextInput::TextInput(const std::string &p_title, SDL_Texture *p_icon, const std:
    // Cursor at the end of the text
    m_cursor = m_inputText.size();
    // Dialog background
-   m_dialogBackground.w = SCREEN_WIDTH;
-   m_dialogBackground.h = 2*LINE_HEIGHT + DIALOG_BORDER;
-   m_dialogBackground.x = (SCREEN_WIDTH - m_dialogBackground.w) / 2;
-   m_dialogBackground.y = SCREEN_HEIGHT - Keyboard::getKeyboardH() - m_dialogBackground.h + DIALOG_BORDER;
+   m_dialogBackground.w = g_screenWidth;
+   m_dialogBackground.h = 2*g_lineHeight + DIALOG_BORDER;
+   m_dialogBackground.x = (g_screenWidth - m_dialogBackground.w) / 2;
+   m_dialogBackground.y = g_screenHeight - Keyboard::getKeyboardH() - m_dialogBackground.h + DIALOG_BORDER;
    // Dialog body
    m_dialogBody.x = m_dialogBackground.x + DIALOG_BORDER;
-   m_dialogBody.y = m_dialogBackground.y + LINE_HEIGHT;
+   m_dialogBody.y = m_dialogBackground.y + g_lineHeight;
    m_dialogBody.w = m_dialogBackground.w - 2*DIALOG_BORDER;
-   m_dialogBody.h = m_dialogBackground.h - LINE_HEIGHT - DIALOG_BORDER;
+   m_dialogBody.h = m_dialogBackground.h - g_lineHeight - DIALOG_BORDER;
    // Number of visible characters
-   m_nbVisibleChars = round(static_cast<double>(m_dialogBody.w - 2*MARGIN_X) / g_charW);
+   m_nbVisibleChars = round(static_cast<double>(m_dialogBody.w - 2*g_marginX) / g_charW);
    // Adjust camera
    adjustCamera();
 }
@@ -45,10 +45,10 @@ void TextInput::render(const bool p_focus)
    SDL_RenderFillRect(g_renderer, &m_dialogBackground);
 
    // Dialog icon
-   SDLUtils::renderTexture(m_icon, m_dialogBackground.x + MARGIN_X, m_dialogBackground.y + LINE_HEIGHT/2, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+   SDLUtils::renderTexture(m_icon, m_dialogBackground.x + g_marginX, m_dialogBackground.y + g_lineHeight/2, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
 
    // Dialog title
-   SDLUtils::renderText(m_title, g_font, m_dialogBackground.x + MARGIN_X + ICON_SIZE + MARGIN_X, m_dialogBackground.y + LINE_HEIGHT/2, {COLOR_TEXT_NORMAL}, {COLOR_TITLE_BG}, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+   SDLUtils::renderText(m_title, g_font, m_dialogBackground.x + g_marginX + g_iconSize + g_marginX, m_dialogBackground.y + g_lineHeight/2, {COLOR_TEXT_NORMAL}, {COLOR_TITLE_BG}, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
 
    // Dialog body
    SDL_SetRenderDrawColor(g_renderer, COLOR_BODY_BG, 255);
@@ -56,11 +56,11 @@ void TextInput::render(const bool p_focus)
 
    // Input text
    if (! m_inputText.empty())
-      SDLUtils::renderText(m_inputText.substr(m_camera.x, m_nbVisibleChars), g_fontMono, m_dialogBody.x + MARGIN_X, m_dialogBody.y + LINE_HEIGHT/2, {COLOR_TEXT_NORMAL}, {COLOR_BODY_BG}, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+      SDLUtils::renderText(m_inputText.substr(m_camera.x, m_nbVisibleChars), g_fontMono, m_dialogBody.x + g_marginX, m_dialogBody.y + g_lineHeight/2, {COLOR_TEXT_NORMAL}, {COLOR_BODY_BG}, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
 
    // Cursor
    SDL_SetRenderDrawColor(g_renderer, COLOR_TEXT_NORMAL, 255);
-   SDL_Rect rect = { m_dialogBody.x + MARGIN_X + (m_cursor - m_camera.x) * g_charW, m_dialogBody.y + 2, 1, LINE_HEIGHT - 4 };
+   SDL_Rect rect = { m_dialogBody.x + g_marginX + (m_cursor - m_camera.x) * g_charW, m_dialogBody.y + 2, 1, g_lineHeight - 4 };
    SDL_RenderFillRect(g_renderer, &rect);
 }
 

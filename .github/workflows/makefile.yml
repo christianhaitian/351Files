@@ -1,0 +1,203 @@
+name: Build 351Files
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout 351Files
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          VERSION="$(git describe --tags --always --dirty)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building version: $VERSION"
+
+      - name: Verify Docker
+        run: |
+          docker --version
+          docker info
+          make --version
+
+      - name: Checkout AmberELEC build system
+        uses: actions/checkout@v4
+        with:
+          repository: AmberELEC/AmberELEC
+          ref: 4e4b76b403a3409fce4ec943fa6f66fe7348160c
+          path: AmberELEC
+          fetch-depth: 1
+
+      - name: Alias /work to AmberELEC dir (matches container bind mount)
+        run: sudo ln -s "$GITHUB_WORKSPACE/AmberELEC" /work
+
+      - name: Patch AmberELEC Jinja2/MarkupSafe host install (avoid legacy .egg)
+        working-directory: AmberELEC
+        run: |
+          set -e
+          sed -i 's|python3 setup.py install --prefix=${TOOLCHAIN}|python3 setup.py install --single-version-externally-managed --root=/ --prefix=${TOOLCHAIN}|' \
+            packages/python/devel/Jinja2/package.mk \
+            packages/python/devel/MarkupSafe/package.mk
+
+      - name: Pull AmberELEC build container
+        run: docker pull ghcr.io/amberelec/amberelec-build@sha256:4f2efc728c0f9b44577c880a856ba2494307bd25a2a09649ba3992d1d8f08ef8
+
+      - name: Get AmberELEC commit
+        id: amberelec_sha
+        working-directory: AmberELEC
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache RK3326 toolchain
+        uses: actions/cache@v4
+        with:
+          path: AmberELEC/build.AmberELEC-RK3326.aarch64/toolchain
+          key: rk3326-toolchain-v7-${{ steps.amberelec_sha.outputs.sha }}
+          restore-keys: |
+            rk3326-toolchain-v7-
+
+      - name: Pre-seed GNU-mirror sources (bypass flaky ftpmirror.gnu.org)
+        working-directory: AmberELEC
+        run: |
+          set -o pipefail
+          set -x
+          mkdir -p sources
+          { grep -rl 'ftpmirror\.gnu\.org' packages --include=package.mk; echo packages/devel/gmp/package.mk; echo packages/compress/zlib/package.mk; echo packages/devel/libtool/package.mk; } | while read -r pkgmk; do
+            (
+              PKG_NAME=""; PKG_VERSION=""; PKG_SHA256=""; PKG_URL=""
+              source "$pkgmk"
+              [ -z "$PKG_URL" ] && exit 0
+              case "$PKG_URL" in *ftpmirror.gnu.org*|*gmplib.org*|*zlib.net*) ;; *) exit 0 ;; esac
+              src_name="${PKG_URL##*/}"
+              case "$PKG_URL" in
+                *ftpmirror.gnu.org*)
+                  path="${PKG_URL#*://ftpmirror.gnu.org}"
+                  case "$path" in
+                    /gnu/*) mirror_url="http://ftp.gnu.org${path}" ;;
+                    *)      mirror_url="http://ftp.gnu.org/gnu${path}" ;;
+                  esac
+                  ;;
+                *gmplib.org*) mirror_url="http://ftp.gnu.org/gnu/gmp/${src_name}" ;;
+                *zlib.net*)   mirror_url="https://github.com/madler/zlib/releases/download/v1.3/${src_name}" ;;
+                *)            mirror_url="$PKG_URL" ;;
+              esac
+              dest_dir="sources/${PKG_NAME}"
+              dest="${dest_dir}/${src_name}"
+              if [ -f "$dest" ] && [ -f "${dest}.sha256" ] && [ "$(cat "${dest}.sha256")" = "$PKG_SHA256" ]; then
+                echo "Already cached: $PKG_NAME"
+                exit 0
+              fi
+              mkdir -p "$dest_dir"
+              echo "Pre-seeding $PKG_NAME <- $mirror_url"
+              if curl -fL --retry 5 --retry-delay 5 -o "$dest" "$mirror_url"; then
+                calc="$(sha256sum "$dest" | cut -d' ' -f1)"
+                if [ -n "$PKG_SHA256" ] && [ "$calc" != "$PKG_SHA256" ]; then
+                  echo "Checksum mismatch for $PKG_NAME, skipping"
+                  rm -f "$dest"
+                  exit 0
+                fi
+                echo "$PKG_URL" > "${dest}.url"
+                echo "$calc" > "${dest}.sha256"
+              else
+                echo "Could not pre-seed $PKG_NAME, will fall back to normal fetch"
+                rm -f "$dest"
+              fi
+            )
+          done
+
+      - name: Build RK3326 toolchain
+        working-directory: AmberELEC
+        run: |
+          set -e
+          export DOCKER_WORK_DIR=/work
+          export PYTHON_EGG_CACHE="$PWD/.python-eggs"
+          mkdir -p "$PYTHON_EGG_CACHE"
+          export VERBOSE=yes
+          make docker-toolchain-RK3326 DOCKER_IMAGE="ghcr.io/amberelec/amberelec-build@sha256:4f2efc728c0f9b44577c880a856ba2494307bd25a2a09649ba3992d1d8f08ef8"
+
+      - name: Build Python3 (host) + Jinja2 for RK3326
+        working-directory: AmberELEC
+        run: |
+          set -e
+          export DEVICE=RK3326 ARCH=aarch64 PACKAGE=Jinja2 DOCKER_WORK_DIR=/work
+          make docker-package DOCKER_IMAGE="ghcr.io/amberelec/amberelec-build@sha256:4f2efc728c0f9b44577c880a856ba2494307bd25a2a09649ba3992d1d8f08ef8"
+          
+      - name: Patch python3 rpath (fixes libpython3.11.so.1.0 not found)
+        working-directory: AmberELEC
+        run: |
+          set -e
+          sudo apt-get update -qq && sudo apt-get install -y -qq patchelf
+          TOOLCHAIN="$PWD/build.AmberELEC-RK3326.aarch64/toolchain"
+          patchelf --set-rpath '$ORIGIN/../lib' "$TOOLCHAIN/bin/python3.11"
+
+      - name: Build SDL2 for RK3326
+        working-directory: AmberELEC
+        run: |
+          set -e
+          export DEVICE=RK3326 ARCH=aarch64 PACKAGE=SDL2 DOCKER_WORK_DIR=/work
+          make docker-package DOCKER_IMAGE="ghcr.io/amberelec/amberelec-build@sha256:4f2efc728c0f9b44577c880a856ba2494307bd25a2a09649ba3992d1d8f08ef8"
+
+      - name: Build SDL2_image and SDL2_ttf for RK3326
+        working-directory: AmberELEC
+        run: |
+          set -e
+          export DEVICE=RK3326 ARCH=aarch64 DOCKER_WORK_DIR=/work
+          export PACKAGE=SDL2_image; make docker-package DOCKER_IMAGE="ghcr.io/amberelec/amberelec-build@sha256:4f2efc728c0f9b44577c880a856ba2494307bd25a2a09649ba3992d1d8f08ef8"
+          export PACKAGE=SDL2_ttf;   make docker-package DOCKER_IMAGE="ghcr.io/amberelec/amberelec-build@sha256:4f2efc728c0f9b44577c880a856ba2494307bd25a2a09649ba3992d1d8f08ef8"
+
+      - name: Verify toolchain
+        working-directory: AmberELEC
+        run: |
+          set -e
+          TOOLCHAIN="$PWD/build.AmberELEC-RK3326.aarch64/toolchain"
+          test -x "$TOOLCHAIN/bin/aarch64-libreelec-linux-gnueabi-g++"
+          test -x "$TOOLCHAIN/aarch64-libreelec-linux-gnueabi/sysroot/usr/bin/sdl2-config"
+          "$TOOLCHAIN/bin/aarch64-libreelec-linux-gnueabi-g++" --version
+
+      - name: Build 351Files (RG351MP / ArkOS)
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -e
+          export CCACHE_DIR="$GITHUB_WORKSPACE/.ccache"
+          mkdir -p "$CCACHE_DIR"
+          TOOLCHAIN="$GITHUB_WORKSPACE/AmberELEC/build.AmberELEC-RK3326.aarch64/toolchain"
+          TARGET="aarch64-libreelec-linux-gnueabi"
+
+          export CC="$TOOLCHAIN/bin/${TARGET}-g++"
+          export STRIP="$TOOLCHAIN/bin/${TARGET}-strip"
+          export SDL2_CONFIG="$TOOLCHAIN/${TARGET}/sysroot/usr/bin/sdl2-config"
+
+          rm -rf build && mkdir -p build
+
+          make clean
+          make CC="$CC" DEVICE=RG351MP SDL2_CONFIG="$SDL2_CONFIG" START_PATH="/roms" RES_PATH="./res"
+          "$STRIP" 351Files
+
+          mkdir -p build/351Files
+          cp -r 351Files README.md res build/351Files
+          cp launchers/ArkOS/351Files.sh build/
+
+          ( cd build && tar zcf "351Files-${VERSION}_RG351MP_ArkOS.tgz" 351Files.sh 351Files )
+          rm -rf build/351Files build/351Files.sh
+
+          make clean
+          ls -lh build/*.tgz
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: 351Files-${{ steps.version.outputs.version }}
+          path: build/*.tgz
+          if-no-files-found: error

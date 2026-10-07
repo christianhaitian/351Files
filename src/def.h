@@ -107,9 +107,8 @@
    #define KEYBOARD_SYMBOL_SIZE     24
 
 // Parameters for RG351MP
+// SCREEN_WIDTH/SCREEN_HEIGHT intentionally omitted: detected at runtime, see g_screenWidth/g_screenHeight
 #elif defined(DEVICE_RG351MP)
-   #define SCREEN_WIDTH             640
-   #define SCREEN_HEIGHT            480
    #define HARDWARE_ACCELERATION    0
    #define FULLSCREEN               1
    #define FONT_NAME                "NotoSans-Regular.ttf"
@@ -367,18 +366,18 @@
    #define BUTTON_PRESSED_RIGHT           event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == 11
    #define BUTTON_PRESSED_PAGEUP          event.type == SDL_JOYBUTTONDOWN && (event.jbutton.button == 4 || event.jbutton.button == 6)
    #define BUTTON_PRESSED_PAGEDOWN        event.type == SDL_JOYBUTTONDOWN && (event.jbutton.button == 5 || event.jbutton.button == 7)
-   #define BUTTON_PRESSED_VALIDATE        event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == 1
-   #define BUTTON_PRESSED_BACK            event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == 0
-   #define BUTTON_PRESSED_MENU_CONTEXT    event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == 3
-   #define BUTTON_PRESSED_SELECT          event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == 2
+   #define BUTTON_PRESSED_VALIDATE        event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == g_btnOk
+   #define BUTTON_PRESSED_BACK            event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == g_btnBack
+   #define BUTTON_PRESSED_MENU_CONTEXT    event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == g_btnMenu
+   #define BUTTON_PRESSED_SELECT          event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == g_btnSelect
    #define BUTTON_HELD_UP                 SDL_JoystickGetButton(g_joystick, 8)
    #define BUTTON_HELD_DOWN               SDL_JoystickGetButton(g_joystick, 9)
    #define BUTTON_HELD_LEFT               SDL_JoystickGetButton(g_joystick, 10)
    #define BUTTON_HELD_RIGHT              SDL_JoystickGetButton(g_joystick, 11)
    #define BUTTON_HELD_PAGEUP             SDL_JoystickGetButton(g_joystick, 4) || SDL_JoystickGetButton(g_joystick, 6)
    #define BUTTON_HELD_PAGEDOWN           SDL_JoystickGetButton(g_joystick, 5) || SDL_JoystickGetButton(g_joystick, 7)
-   #define BUTTON_HELD_SELECT             SDL_JoystickGetButton(g_joystick, 2)
-   #define BUTTON_HELD_VALIDATE           SDL_JoystickGetButton(g_joystick, 1)
+   #define BUTTON_HELD_SELECT             SDL_JoystickGetButton(g_joystick, g_btnSelect)
+   #define BUTTON_HELD_VALIDATE           SDL_JoystickGetButton(g_joystick, g_btnOk)
 #elif defined(DEVICE_RGB10)
    #define BUTTON_PRESSED_UP              event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == 8
    #define BUTTON_PRESSED_DOWN            event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == 9
@@ -499,6 +498,19 @@
 extern SDL_Window* g_window;
 extern SDL_Renderer* g_renderer;
 extern SDL_Joystick* g_joystick;
+extern int g_screenWidth;                    // Actual window width in px (set at init)
+extern int g_screenHeight;                   // Actual window height in px (set at init)
+extern int g_fontSize;
+extern int g_lineHeight;
+extern int g_iconSize;
+extern int g_marginX;
+extern int g_keyboardMargin;
+extern int g_keyboardKeySpacing;
+extern int g_keyboardSymbolSize;
+extern int g_btnOk;
+extern int g_btnBack;
+extern int g_btnSelect;
+extern int g_btnMenu;
 extern TTF_Font *g_font;                     // Variable size font
 extern TTF_Font *g_fontMono;                 // Mono size font
 extern int g_charW;                          // Width of one character in monospace font

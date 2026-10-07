@@ -60,43 +60,43 @@ void Dialog::render(const bool p_focus)
    }
 
    // Largest line of the dialog
-   l_dialogDim.w = DIALOG_BORDER + MARGIN_X + l_dialogDim.w + MARGIN_X + DIALOG_BORDER;
+   l_dialogDim.w = DIALOG_BORDER + g_marginX + l_dialogDim.w + g_marginX + DIALOG_BORDER;
    if (m_iconPresent)
-      l_dialogDim.w += ICON_SIZE + MARGIN_X;
-   if (l_dialogDim.w > SCREEN_WIDTH)
-      l_dialogDim.w = SCREEN_WIDTH;
+      l_dialogDim.w += g_iconSize + g_marginX;
+   if (l_dialogDim.w > g_screenWidth)
+      l_dialogDim.w = g_screenWidth;
 
    // Render dialog background
-   l_dialogDim.h = LINE_HEIGHT + (m_labels.size() + m_options.size()) * LINE_HEIGHT + DIALOG_BORDER;
-   l_dialogDim.x = (SCREEN_WIDTH - l_dialogDim.w) / 2;
-   l_dialogDim.y = (SCREEN_HEIGHT - l_dialogDim.h) / 2;
+   l_dialogDim.h = g_lineHeight + (m_labels.size() + m_options.size()) * g_lineHeight + DIALOG_BORDER;
+   l_dialogDim.x = (g_screenWidth - l_dialogDim.w) / 2;
+   l_dialogDim.y = (g_screenHeight - l_dialogDim.h) / 2;
    SDL_SetRenderDrawColor(g_renderer, COLOR_TITLE_BG, 255);
    SDL_RenderFillRect(g_renderer, &l_dialogDim);
 
    // Render dialog body
    SDL_Rect l_rect;
    l_rect.x = l_dialogDim.x + DIALOG_BORDER;
-   l_rect.y = l_dialogDim.y + LINE_HEIGHT;
+   l_rect.y = l_dialogDim.y + g_lineHeight;
    l_rect.w = l_dialogDim.w - 2 * DIALOG_BORDER;
-   l_rect.h = l_dialogDim.h - LINE_HEIGHT - DIALOG_BORDER;
+   l_rect.h = l_dialogDim.h - g_lineHeight - DIALOG_BORDER;
    SDL_SetRenderDrawColor(g_renderer, COLOR_BODY_BG, 255);
    SDL_RenderFillRect(g_renderer, &l_rect);
 
    // Display title text
-   int l_y = l_dialogDim.y + LINE_HEIGHT / 2;
-   SDLUtils::renderTexture(l_textureTitle, l_dialogDim.x + DIALOG_BORDER + MARGIN_X, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+   int l_y = l_dialogDim.y + g_lineHeight / 2;
+   SDLUtils::renderTexture(l_textureTitle, l_dialogDim.x + DIALOG_BORDER + g_marginX, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
 
    // Display labels
-   l_y += LINE_HEIGHT;
+   l_y += g_lineHeight;
    std::vector<SDL_Texture *>::iterator l_tex, l_icon;
    for (l_tex = l_texLabels.begin(), l_icon = m_labelIcons.begin(); l_tex != l_texLabels.end(); ++l_tex, ++l_icon)
    {
       // Icon
       if (*l_icon != NULL)
-         SDLUtils::renderTexture(*l_icon, l_dialogDim.x + DIALOG_BORDER + MARGIN_X, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+         SDLUtils::renderTexture(*l_icon, l_dialogDim.x + DIALOG_BORDER + g_marginX, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
       // Text
-      SDLUtils::renderTexture(*l_tex, l_dialogDim.x + DIALOG_BORDER + MARGIN_X + (*l_icon == NULL ? 0 : ICON_SIZE + MARGIN_X), l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
-      l_y += LINE_HEIGHT;
+      SDLUtils::renderTexture(*l_tex, l_dialogDim.x + DIALOG_BORDER + g_marginX + (*l_icon == NULL ? 0 : g_iconSize + g_marginX), l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+      l_y += g_lineHeight;
    }
 
    // Render cursor
@@ -107,9 +107,9 @@ void Dialog::render(const bool p_focus)
       else
          SDL_SetRenderDrawColor(g_renderer, COLOR_CURSOR_NO_FOCUS, 255);
       l_rect.x = l_dialogDim.x + DIALOG_BORDER;
-      l_rect.y = l_dialogDim.y + LINE_HEIGHT + (m_cursor + m_labels.size()) * LINE_HEIGHT;
+      l_rect.y = l_dialogDim.y + g_lineHeight + (m_cursor + m_labels.size()) * g_lineHeight;
       l_rect.w = l_dialogDim.w - 2 * DIALOG_BORDER;
-      l_rect.h = LINE_HEIGHT;
+      l_rect.h = g_lineHeight;
       SDL_RenderFillRect(g_renderer, &l_rect);
    }
 
@@ -118,10 +118,10 @@ void Dialog::render(const bool p_focus)
    {
       // Icon
       if (*l_icon != NULL)
-         SDLUtils::renderTexture(*l_icon, l_dialogDim.x + DIALOG_BORDER + MARGIN_X, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+         SDLUtils::renderTexture(*l_icon, l_dialogDim.x + DIALOG_BORDER + g_marginX, l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
       // Text
-      SDLUtils::renderTexture(*l_tex, l_dialogDim.x + DIALOG_BORDER + MARGIN_X + (*l_icon == NULL ? 0 : ICON_SIZE + MARGIN_X), l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
-      l_y += LINE_HEIGHT;
+      SDLUtils::renderTexture(*l_tex, l_dialogDim.x + DIALOG_BORDER + g_marginX + (*l_icon == NULL ? 0 : g_iconSize + g_marginX), l_y, SDLUtils::T_ALIGN_LEFT, SDLUtils::T_ALIGN_MIDDLE);
+      l_y += g_lineHeight;
    }
 
    // Clean up

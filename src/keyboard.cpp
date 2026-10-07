@@ -23,7 +23,7 @@ Keyboard::Keyboard(IWindow *p_parent, const bool p_quitOnEnter):
    m_keyLabel[2] = "1234567890 .,:!?/\\\"'  ()[]<>_;$";
    m_keyLabel[3] = "1234567890 ()[]{}~|^  @#%&*-+=`";
    std::ostringstream oss;
-   oss << '/' << KEYBOARD_SYMBOL_SIZE;
+   oss << '/' << g_keyboardSymbolSize;
    m_texShiftEmpty =    SDLUtils::loadTexture(std::string(RES_PATH) + oss.str() + "/keyboard_shift_empty.png");
    m_texShiftFull =     SDLUtils::loadTexture(std::string(RES_PATH) + oss.str() + "/keyboard_shift_full.png");
    m_texEnter =         SDLUtils::loadTexture(std::string(RES_PATH) + oss.str() + "/keyboard_enter.png");
@@ -190,8 +190,8 @@ void Keyboard::init(void)
    // Size and coordinates of the first key
    m_key[0].w = getKeyW();
    m_key[0].h = getKeyH();
-   m_key[0].x = round((SCREEN_WIDTH - (11*m_key[0].w + 10*KEYBOARD_KEY_SPACING)) / 2);
-   m_key[0].y = KEYBOARD_MARGIN;
+   m_key[0].x = round((g_screenWidth - (11*m_key[0].w + 10*g_keyboardKeySpacing)) / 2);
+   m_key[0].y = g_keyboardMargin;
 
    // Height of all the keys
    int indKey = 1;
@@ -202,12 +202,12 @@ void Keyboard::init(void)
    m_keyboard.w = getKeyboardW();
    m_keyboard.h = getKeyboardH();
    m_keyboard.x = 0;
-   m_keyboard.y = SCREEN_HEIGHT - m_keyboard.h;
+   m_keyboard.y = g_screenHeight - m_keyboard.h;
 
    // Keys: 1st line
    for (indKey = 1; indKey <= 10; ++indKey)
    {
-      m_key[indKey].x = m_key[indKey - 1].x + m_key[indKey - 1].w + KEYBOARD_KEY_SPACING;
+      m_key[indKey].x = m_key[indKey - 1].x + m_key[indKey - 1].w + g_keyboardKeySpacing;
       m_key[indKey].y = m_key[0].y;
       m_key[indKey].w = m_key[0].w;
    }
@@ -215,14 +215,14 @@ void Keyboard::init(void)
    // Keys: 2nd line
    m_key[11].w = m_key[0].w;
    m_key[11].x = m_key[0].x + round(m_key[0].w/3);
-   m_key[11].y = m_key[0].y + m_key[0].h + KEYBOARD_KEY_SPACING;
+   m_key[11].y = m_key[0].y + m_key[0].h + g_keyboardKeySpacing;
    for (indKey = 12; indKey <= 20; ++indKey)
    {
-      m_key[indKey].x = m_key[indKey - 1].x + m_key[indKey - 1].w + KEYBOARD_KEY_SPACING;
+      m_key[indKey].x = m_key[indKey - 1].x + m_key[indKey - 1].w + g_keyboardKeySpacing;
       m_key[indKey].y = m_key[11].y;
       if (indKey == 20)
          // Enter key
-         m_key[indKey].w = 2*m_key[0].w + KEYBOARD_KEY_SPACING - (m_key[11].x - m_key[0].x);
+         m_key[indKey].w = 2*m_key[0].w + g_keyboardKeySpacing - (m_key[11].x - m_key[0].x);
       else
          m_key[indKey].w = m_key[0].w;
    }
@@ -230,24 +230,24 @@ void Keyboard::init(void)
    // Keys: 3rd line
    m_key[21].w = m_key[0].w;
    m_key[21].x = m_key[0].x;
-   m_key[21].y = m_key[11].y + m_key[0].h + KEYBOARD_KEY_SPACING;
+   m_key[21].y = m_key[11].y + m_key[0].h + g_keyboardKeySpacing;
    for (indKey = 22; indKey <= 31; ++indKey)
    {
-      m_key[indKey].x = m_key[indKey - 1].x + m_key[indKey - 1].w + KEYBOARD_KEY_SPACING;
+      m_key[indKey].x = m_key[indKey - 1].x + m_key[indKey - 1].w + g_keyboardKeySpacing;
       m_key[indKey].y = m_key[21].y;
       m_key[indKey].w = m_key[0].w;
    }
 
    // Keys: 4th line
-   m_key[32].w = m_key[0].w + m_key[11].x - KEYBOARD_MARGIN;
+   m_key[32].w = m_key[0].w + m_key[11].x - g_keyboardMargin;
    m_key[32].x = m_key[0].x;
-   m_key[32].y = m_key[21].y + m_key[0].h + KEYBOARD_KEY_SPACING;
-   m_key[33].w = 9*m_key[0].w + 7*KEYBOARD_KEY_SPACING - m_key[32].w;
-   m_key[33].x = m_key[32].x + m_key[32].w + KEYBOARD_KEY_SPACING;
+   m_key[32].y = m_key[21].y + m_key[0].h + g_keyboardKeySpacing;
+   m_key[33].w = 9*m_key[0].w + 7*g_keyboardKeySpacing - m_key[32].w;
+   m_key[33].x = m_key[32].x + m_key[32].w + g_keyboardKeySpacing;
    m_key[33].y = m_key[32].y;
    for (indKey = 34; indKey <= 35; ++indKey)
    {
-      m_key[indKey].x = m_key[indKey - 1].x + m_key[indKey - 1].w + KEYBOARD_KEY_SPACING;
+      m_key[indKey].x = m_key[indKey - 1].x + m_key[indKey - 1].w + g_keyboardKeySpacing;
       m_key[indKey].y = m_key[32].y;
       m_key[indKey].w = m_key[0].w;
    }
@@ -411,7 +411,7 @@ SDL_Color Keyboard::getBackgroundColor(const int p_i, const bool p_focus) const
 // Key and keyboard size
 int Keyboard::getKeyW(void)
 {
-   return round((SCREEN_WIDTH - 2*KEYBOARD_MARGIN - 10*KEYBOARD_KEY_SPACING) / 11);
+   return round((g_screenWidth - 2*g_keyboardMargin - 10*g_keyboardKeySpacing) / 11);
 }
 
 int Keyboard::getKeyH(void)
@@ -421,12 +421,12 @@ int Keyboard::getKeyH(void)
 
 int Keyboard::getKeyboardW(void)
 {
-   return SCREEN_WIDTH;
+   return g_screenWidth;
 }
 
 int Keyboard::getKeyboardH(void)
 {
-   return 2*KEYBOARD_MARGIN + 3*KEYBOARD_KEY_SPACING + 4*getKeyH();
+   return 2*g_keyboardMargin + 3*g_keyboardKeySpacing + 4*getKeyH();
 }
 
 //------------------------------------------------------------------------------

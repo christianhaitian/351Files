@@ -68,7 +68,7 @@ bool SDLUtils::init()
       g_marginX             = (int)(MARGIN_X             * scale);
       g_keyboardMargin      = (int)(KEYBOARD_MARGIN      * scale);
       g_keyboardKeySpacing  = (int)(KEYBOARD_KEY_SPACING * scale);
-      g_keyboardSymbolSize  = (int)(KEYBOARD_SYMBOL_SIZE * scale);
+      g_keyboardSymbolSize  = (g_screenWidth > 640) ? 32 : KEYBOARD_SYMBOL_SIZE;
 	  
       g_window = SDL_CreateWindow(APP_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, g_screenWidth, g_screenHeight, SDL_WINDOW_FULLSCREEN_DESKTOP);
    #else

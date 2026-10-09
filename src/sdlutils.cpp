@@ -60,11 +60,12 @@ bool SDLUtils::init()
          g_screenHeight = 480;
       }
 	  
-	  // Set UI metrics, scaled for resolution
-      float scale = (g_screenWidth > 640) ? 1.5f : 1.0f;
+      // Set UI metrics, scaled for resolution
+      // Icon size snapped to nearest available res folder (res/32 at scaled)
+      float scale = (g_screenWidth > 640) ? 1.333f : 1.0f;
       g_fontSize            = (int)(FONT_SIZE            * scale);
       g_lineHeight          = (int)(LINE_HEIGHT          * scale);
-      g_iconSize            = (int)(ICON_SIZE            * scale);
+      g_iconSize            = (g_screenWidth > 640) ? 32 : ICON_SIZE;
       g_marginX             = (int)(MARGIN_X             * scale);
       g_keyboardMargin      = (int)(KEYBOARD_MARGIN      * scale);
       g_keyboardKeySpacing  = (int)(KEYBOARD_KEY_SPACING * scale);

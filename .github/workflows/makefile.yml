@@ -62,9 +62,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: AmberELEC/build.AmberELEC-RK3326.aarch64/toolchain
-          key: rk3326-toolchain-v6-${{ steps.amberelec_sha.outputs.sha }}
+          key: rk3326-toolchain-v7-${{ steps.amberelec_sha.outputs.sha }}
           restore-keys: |
-            rk3326-toolchain-v6-
+            rk3326-toolchain-v7-
 
       - name: Pre-seed GNU-mirror sources (bypass flaky ftpmirror.gnu.org)
         working-directory: AmberELEC

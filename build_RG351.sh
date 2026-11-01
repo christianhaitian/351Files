@@ -15,6 +15,9 @@ build351Files() {
    FIRMWARE="$2"
    START_PATH="$3"
    RES_PATH="$4"
+   if [[ "$DEVICE" == "RGB10" ]]; then
+     git checkout ad0c1061423ca9dfb489aa566260c440f1941677
+   fi
    make clean
    make CC=g++ DEVICE="$DEVICE" SDL2_CONFIG=sdl2-config START_PATH="$START_PATH" RES_PATH="$RES_PATH" -j$(nproc)
    strip 351Files

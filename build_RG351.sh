@@ -15,7 +15,7 @@ build351Files() {
    FIRMWARE="$2"
    START_PATH="$3"
    RES_PATH="$4"
-   if [[ "$DEVICE" == "RGB10" || "$DEVICE" == "RG503" || "$DEVICE" == "RGB20PRO" || "$DEVICE" == "MINILOONG" || "$DEVICE" == "RGB30" ]]; then
+   if [[ "$DEVICE" == "RGB10" || "$DEVICE" == "RG503" || "$DEVICE" == "RGB20PRO" || "$DEVICE" == "MINILOONG" || "$DEVICE" == "RGB30" || "$DEVICE" == "RG353V" ]]; then
      git checkout ad0c1061423ca9dfb489aa566260c440f1941677
    fi
    make clean
